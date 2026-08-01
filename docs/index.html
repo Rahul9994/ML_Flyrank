@@ -1,1 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking Signal Analysis — A Search Intelligence Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F8FA;
+    --ink:#14171C;
+    --ink-soft:#4A5160;
+    --rule:#DCE0E6;
+    --accent:#3454D1;      /* muted search-link indigo */
+    --accent-soft:#EAEEFC;
+    --up:#3E8E5C;
+    --down:#C25B42;
+    --card:#FFFFFF;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Newsreader', serif;
+    --sans: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); line-height:1.6; font-size:17px;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);}
+  .wrap{max-width:760px; margin:0 auto; padding:0 24px;}
 
+  /* rank badge — the signature element, used as section markers throughout */
+  .rank{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:6px;
+    background:var(--ink); color:var(--paper);
+    font-family:var(--mono); font-size:14px; font-weight:600;
+    flex:0 0 auto;
+  }
+  .rank.pos1{background:var(--accent);}
+
+  header.hero{
+    padding:88px 0 56px; border-bottom:1px solid var(--rule);
+  }
+  .eyebrow{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--mono); font-size:12.5px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  h1{
+    font-family:var(--serif); font-weight:500; font-size:44px; line-height:1.12;
+    letter-spacing:-.01em; margin:0 0 22px;
+  }
+  .dek{
+    font-size:19px; color:var(--ink-soft); max-width:640px; margin:0 0 30px;
+  }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:22px; font-family:var(--mono);
+    font-size:13px; color:var(--ink-soft); border-top:1px solid var(--rule);
+    padding-top:20px;
+  }
+  .meta-row strong{color:var(--ink); font-weight:600;}
+
+  section{padding:56px 0; border-bottom:1px solid var(--rule);}
+  section:last-of-type{border-bottom:none;}
+  .sec-head{display:flex; align-items:center; gap:14px; margin-bottom:26px;}
+  .sec-head h2{
+    font-family:var(--serif); font-weight:500; font-size:27px; margin:0;
+  }
+  p{margin:0 0 16px;}
+  .lede{font-size:18px; color:var(--ink-soft);}
+
+  .callout{
+    background:var(--card); border:1px solid var(--rule); border-radius:10px;
+    padding:22px 24px; margin:20px 0;
+  }
+  .callout.abstract{background:var(--accent-soft); border-color:#CBD6F6;}
+  .abstract p{margin:0; font-size:16.5px;}
+
+  ul.plain{padding-left:20px; margin:0 0 16px;}
+  ul.plain li{margin-bottom:8px;}
+
+  table{width:100%; border-collapse:collapse; margin:18px 0 8px; font-size:15px;}
+  th,td{
+    text-align:left; padding:10px 12px; border-bottom:1px solid var(--rule);
+    font-family:var(--mono); font-size:14px;
+  }
+  th{font-family:var(--sans); font-weight:600; color:var(--ink-soft);
+     font-size:13px; text-transform:uppercase; letter-spacing:.04em;}
+  td.num{font-weight:600;}
+  tr.best td{color:var(--accent);}
+  .caption{font-size:13px; color:var(--ink-soft); margin-top:6px;}
+
+  figure{margin:22px 0;}
+  figure img{width:100%; border-radius:8px; border:1px solid var(--rule); display:block;}
+  figcaption{font-size:13.5px; color:var(--ink-soft); margin-top:8px;}
+
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0;}
+  .stat{
+    background:var(--card); border:1px solid var(--rule); border-radius:10px;
+    padding:16px 18px;
+  }
+  .stat .n{font-family:var(--mono); font-size:24px; font-weight:600;}
+  .stat .n.up{color:var(--up);} .stat .n.down{color:var(--down);}
+  .stat .l{font-size:13px; color:var(--ink-soft); margin-top:2px;}
+
+  .action-row{
+    display:flex; gap:14px; padding:14px 0; border-bottom:1px dashed var(--rule);
+    align-items:flex-start;
+  }
+  .action-row .rank{background:var(--accent-soft); color:var(--accent); font-size:12px;}
+  .action-row .body b{display:block; font-size:15px; margin-bottom:2px;}
+  .action-row .body span{font-size:14px; color:var(--ink-soft);}
+
+  .no-go{
+    border-left:3px solid var(--down); background:#FBF0EE; border-radius:0 8px 8px 0;
+    padding:16px 20px; margin:18px 0;
+  }
+  .no-go b{color:var(--down);}
+
+  .repro-list a{display:block; padding:10px 0; border-bottom:1px solid var(--rule); font-family:var(--mono); font-size:14.5px;}
+
+  footer{padding:48px 0 90px; text-align:center;}
+  footer .credit{
+    font-size:14.5px; color:var(--ink-soft); border-top:1px solid var(--rule);
+    padding-top:26px;
+  }
+  footer .credit a{font-weight:600;}
+
+  @media (max-width:600px){
+    header.hero{padding:56px 0 40px;}
+    h1{font-size:32px;}
+    .stat-grid{grid-template-columns:1fr;}
+    table{font-size:13px;}
+    th,td{padding:8px 6px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> SEARCH INTELLIGENCE CAPSTONE · LANE 1 — RANKING SIGNAL ANALYSIS</div>
+    <h1>Position Still Wins — But Not by as Much as a Naive Split Suggests</h1>
+    <p class="dek">A study of which observable content and search signals associate with click-through rate across the FlyRank ML Internship warehouse, and what happens to a model's apparent skill once client-level leakage is removed.</p>
+    <div class="meta-row">
+      <span><strong>Author</strong> Rahul Penugonda</span>
+      <span><strong>Dataset</strong> FlyRank/internship-warehouse</span>
+      <span><strong>Rows analyzed</strong> 2,414,248</span>
+      <span><strong>Report</strong> August 2026</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section id="abstract">
+    <div class="sec-head"><span class="rank pos1">01</span><h2>Abstract</h2></div>
+    <div class="callout abstract">
+      <p><strong>Question:</strong> which observable content and search signals associate with click-through rate (CTR), and does a learned model meaningfully beat a hand-written rule once evaluated honestly? <strong>Method:</strong> a gradient boosting regressor was trained on six observed signals — average position, content impression volume, and query-shape features — and compared against a mean-CTR baseline and a hand-written scoring rule, using a client-grouped validation split to prevent leakage across the same client. <strong>Result:</strong> under an honest, client-grouped split the model shows a small but real improvement over baseline (R² = 0.0086 vs. −0.0209), considerably smaller than the R² = 0.0360 a naive random split would report — a roughly 4.7× gap that demonstrates how much a careless validation design can overstate real predictive power. Average position remains the dominant signal by a wide margin, consistent across every stage of this study.</p>
+    </div>
+  </section>
+
+  <section id="intro">
+    <div class="sec-head"><span class="rank">02</span><h2>Introduction</h2></div>
+    <p class="lede">A content team can review only so many pages a week. The decision this work supports is simple: which pages should land at the top of that review queue, and why — using evidence rather than intuition.</p>
+    <p>Two competing instincts guide most content prioritization: chase pages with high keyword search volume, or trust a page's current search position as the signal that matters. This study tests both instincts directly against 90 days of real, hashed, anonymized search performance data, and asks a further question most internal tools skip: does a learned model's apparent edge over a simple rule survive contact with an honest validation design, or is it partly an artifact of how the evaluation was set up?</p>
+  </section>
+
+  <section id="data">
+    <div class="sec-head"><span class="rank">03</span><h2>Data</h2></div>
+    <p>This study uses the <code>fact_content_query_90d</code> table from the <strong>FlyRank/internship-warehouse</strong> release on Hugging Face — a 90-day rolling window of query-level search performance, hashed and anonymized at the client and content level.</p>
+    <div class="stat-grid">
+      <div class="stat"><div class="n">2.41M</div><div class="l">rows in the query-level fact table</div></div>
+      <div class="stat"><div class="n">90d</div><div class="l">rolling performance window</div></div>
+    </div>
+    <p><strong>Exclusions:</strong> rows with zero observed impressions (no real performance signal), and rows with an average position below 1 (a data artifact that inflates position-based scores if left in). No client names, domains, or private queries appear anywhere in this study or its underlying code — every identifier is a one-way hash.</p>
+  </section>
+
+  <section id="methodology">
+    <div class="sec-head"><span class="rank">04</span><h2>Methodology</h2></div>
+    <p><strong>Task type:</strong> scoring (regression). CTR is continuous, not categorical, so this is framed as a regression problem rather than classification.</p>
+    <p><strong>Label:</strong> <code>ctr</code>, computed as <code>clicks_90d / impressions_90d</code> — not a raw warehouse column, deliberately derived at query time so it can never silently double as an input feature.</p>
+    <p><strong>Features:</strong> average position, content-level 90-day impression volume, and four query-shape signals (character count, token count, rare-impression share, anonymized-impression share) — each observed independently of the label, with no forward-looking or label-derived inputs.</p>
+    <p><strong>Baseline:</strong> a hand-written rule scoring pages by inverse position and log-scaled volume, aggregated to one row per content item to prevent a single high-volume page from dominating the ranked queue, with position floored at 1 to prevent score blow-up on invalid values.</p>
+    <p><strong>Validation design:</strong> split by <code>client_hash_id</code>, so no client's content appears in both the training and test sets — this is compared directly against a naive random split to quantify how much that choice matters.</p>
+    <p><strong>Leakage audit:</strong> every feature's correlation with the label was checked directly. All six sit between −0.12 and +0.05 — far from the near-1.0 correlation a genuinely leaked feature would show.</p>
+  </section>
+
+  <section id="results">
+    <div class="sec-head"><span class="rank">05</span><h2>Results</h2></div>
+    <p class="lede">Model vs. baseline, evaluated on the same client-grouped split.</p>
+    <table>
+      <thead><tr><th>Model</th><th>R²</th><th>MAE</th></tr></thead>
+      <tbody>
+        <tr><td>Baseline (mean CTR)</td><td class="num">−0.0209</td><td class="num">0.005369</td></tr>
+        <tr class="best"><td>Gradient Boosting</td><td class="num">0.0086</td><td class="num">0.005432</td></tr>
+      </tbody>
+    </table>
+    <p class="caption">R² favors the model — it explains real variance the baseline can't. MAE is marginally worse for the model, meaning it reduces systematic error better than it reduces typical per-row error. Both numbers are reported rather than the more flattering one alone.</p>
+
+    <figure>
+      <img src="img/split_comparison_r2.png" alt="Bar chart comparing R2 under a naive random split versus a client-grouped split">
+      <figcaption><strong>Figure 1.</strong> A naive random split reports R² = 0.0360 — roughly 4.7× higher than the honest, client-grouped split (R² = 0.0086). This gap is the leakage effect made visible: a plain random split lets the same client appear in both train and test, letting the model partly learn client-specific quirks instead of a pattern that generalizes to unseen clients.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="img/ctr_by_position.png" alt="Bar chart of average CTR by search position tier">
+      <figcaption><strong>Figure 2.</strong> CTR falls sharply as position worsens — the single strongest, most consistent relationship found at every stage of this study, from the earliest exploratory notebook through the final model's feature importances.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="img/reason_code_distribution.png" alt="Bar chart of content items by playbook reason code">
+      <figcaption><strong>Figure 3.</strong> Distribution of content items across the action playbook's reason codes — most flagged items fall into the CTR-below-expectation category described in the recommendations below.</figcaption>
+    </figure>
+  </section>
+
+  <section id="limitations">
+    <div class="sec-head"><span class="rank">06</span><h2>Limitations &amp; Honest Framing</h2></div>
+    <p>This is an <strong>observational</strong> study. An R² of 0.0086, while real and reproducible, is small in absolute terms — most CTR variance remains unexplained by these six features. The model should be read as capturing a directional pattern the baseline misses, not as a reliably better prediction on any single row.</p>
+    <p>Position dominates whatever signal exists here. This echoes a caution raised directly in FlyRank's own research: composite or model-based scores that already include position as an input risk simply rediscovering that input rather than finding genuinely new structure.</p>
+    <p>Nothing here establishes causation. A page's refresh, position, or volume being <em>associated</em> with different CTR outcomes is not evidence that changing one of them <em>causes</em> the other to move. Every claim in this report should be read as observed, directional, and decision-support — never as guaranteed or causal.</p>
+  </section>
+
+  <section id="recommendations">
+    <div class="sec-head"><span class="rank">07</span><h2>Ranked Recommendations</h2></div>
+    <p class="lede">Intended use: a content team lead prioritizing a limited weekly review queue — not an automated publishing or ranking-change tool.</p>
+
+    <div class="action-row">
+      <span class="rank">1</span>
+      <div class="body"><b>Review snippet &amp; metadata on page-1 under-performers</b><span>Pages ranking well but earning less CTR than their position/volume would suggest — the highest-confidence flag in the queue.</span></div>
+    </div>
+    <div class="action-row">
+      <span class="rank">2</span>
+      <div class="body"><b>Refresh striking-distance pages (positions 11–20)</b><span>Already showing search demand and topical fit; a targeted relevance improvement has the clearest path to page 1.</span></div>
+    </div>
+    <div class="action-row">
+      <span class="rank">3</span>
+      <div class="body"><b>Monitor, don't act on, low-volume flags</b><span>Rows with fewer than 100 90-day impressions carry noisier CTR estimates and need a lighter-touch review cadence.</span></div>
+    </div>
+
+    <div class="no-go">
+      <b>What should never be automated:</b> auto-publishing content changes, auto-deprioritizing or removing pages, or treating this score as a ranking guarantee. Every row in this queue is a prioritization aid for a human reviewer, not a decision-maker.
+    </div>
+
+    <p><strong>Monitoring &amp; retrain triggers:</strong> revisit this queue if average position shifts more than roughly 5 places portfolio-wide month over month, if the honest grouped-split R² drops meaningfully on a new holdout month, or on a fixed quarterly cadence regardless of any visible signal break.</p>
+  </section>
+
+  <section id="reproducibility">
+    <div class="sec-head"><span class="rank">08</span><h2>Reproducibility</h2></div>
+    <p>Every result in this report traces back to an executed, committed notebook in the project repository.</p>
+    <div class="repro-list">
+      <a href="https://github.com/Rahul9994/ML_Flyrank">→ Repository root</a>
+      <a href="https://github.com/Rahul9994/ML_Flyrank/blob/main/work/notebooks/w03_data_contract.ipynb">→ Data contract &amp; leakage check (w03)</a>
+      <a href="https://github.com/Rahul9994/ML_Flyrank/blob/main/work/notebooks/w04_baseline_score.ipynb">→ Baseline rule &amp; ranked queue (w04)</a>
+      <a href="https://github.com/Rahul9994/ML_Flyrank/blob/main/work/notebooks/w05_model.ipynb">→ Model training &amp; comparison (w05)</a>
+      <a href="https://github.com/Rahul9994/ML_Flyrank/blob/main/work/notebooks/w06_validation_audit.ipynb">→ Validation audit &amp; claim rewrite (w06)</a>
+      <a href="https://github.com/Rahul9994/ML_Flyrank/blob/main/work/notebooks/w07_action_playbook.ipynb">→ Action playbook (w07)</a>
+      <a href="https://github.com/Rahul9994/ML_Flyrank/blob/main/work/notebooks/capstone.ipynb">→ Capstone notebook (this report)</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="credit">
+      Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai" target="_blank" rel="noopener">flyrank.ai</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
